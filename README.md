@@ -2,9 +2,9 @@
 PowerShell installer script for Longvinter Windows Server
 
 ### Requirements
-Administrator privileges
-Windows 10+
-PowerShell 5+
+1. Administrator privileges
+2. Windows 10+
+3. PowerShell 5+
 
 #
 
