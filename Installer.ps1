@@ -107,7 +107,7 @@ Write-Host "Please wait while everything is being checked..."
 check_software("Steam")  # argument is program name.
 check_software("Git")
 check_git-lfs
-check_ram(3)  # argument is amount of RAM in GB.
+check_ram(3)  # argument is amount of (required) RAM in GB.
 check_arch
 
 If ($check -eq 5)
