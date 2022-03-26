@@ -47,7 +47,7 @@ function check_software($app)
 		Write-Host "✓" -NoNewline -ForegroundColor Green
 		Write-Host "]" -NoNewline
 
-		Write-Host " $app is insalled."
+		Write-Host " $app is installed."
 		$global:check += 1
 	}
 	Else
@@ -56,7 +56,7 @@ function check_software($app)
 		Write-Host "X" -NoNewline -ForegroundColor Red
 		Write-Host "]" -NoNewline
 		
-		Write-Host " $app is not insalled."
+		Write-Host " $app is not intsalled."
 	}
 }
 function check_ram ($in)
