@@ -23,6 +23,7 @@ function check_git-lfs
 		Write-Host "[" -NoNewline
 		Write-Host "✓" -NoNewline -ForegroundColor Green
 		Write-Host "]" -NoNewline
+		
 		Write-Host " Git-LFS is installed"
 		$global:check += 1
 	}
@@ -101,6 +102,42 @@ function check_arch
 		
 		Write-Host " $arch OS detected. You need a 64-bit system to install Longvinter Server."
 	}
+}
+function getkey
+{
+	$exists = Test-Path -Path ".\longvinter-windows-server\Longvinter\Saved\Logs\Longvinter.log" -PathType Leaf
+	
+	IF ($exists)
+	{
+		Write-Host ([uint64](Select-String -Pattern "0[xX][0-9a-fA-F]{15}" -Path ".\longvinter-windows-server\Longvinter\Saved\Logs\Longvinter.log").Matches.groups[0].value) -NoNewline -ForegroundColor Green
+	}
+	Else
+	{
+		Write-Host "[" -NoNewline
+		Write-Host "X" -NoNewline -ForegroundColor Red
+		Write-Host "]" -NoNewline -ForegroundColor Gray
+		
+		Write-Host " Longvinter.log not found. Please run the server first."
+	}
+	
+	Exit
+}
+function update
+{
+	# TODO: Implement git updating
+}
+
+If ($args.Count -eq 1)
+{
+	If ($args[0].ToString().ToLower() -eq "getkey")
+	{
+		getkey
+	}
+	Elseif ($args[0].ToString().ToLower() -eq "update")
+	{
+		update
+	}
+	Exit
 }
 
 Write-Host "Please wait while everything is being checked..."
