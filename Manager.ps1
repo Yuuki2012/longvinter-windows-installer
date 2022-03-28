@@ -6,57 +6,55 @@
 	 Created with: 	SAPIEN Technologies, Inc., PowerShell Studio 2021 v5.8.196
 	 Created on:   	2022/03/25 05:55:13 PM
 	 Created by:   	Yuuki2012
-	 Organization: 	Fantastiic
-	 Filename:     	Installer.ps1
+	 Organization: 	Raiza.dev
+	 Filename:     	Manager.ps1
 	===========================================================================
 	.DESCRIPTION
-		Installer for Longvinter-windows-server.
+		Manager for Longvinter Windows Server.
 #>
 
 $global:check = 0
 
+function success ($msg)
+{
+	Write-Host "[" -NoNewline
+	Write-Host "✓" -NoNewline -ForegroundColor Green
+	Write-Host "]" -NoNewline
+	Write-Host " $msg"
+}
+function error ($msg)
+{
+	Write-Host "[" -NoNewline
+	Write-Host "X" -NoNewline -ForegroundColor Red
+	Write-Host "]" -NoNewline
+	Write-Host " $msg"
+}
 function check_git-lfs
 {
 	Try
 	{
 		git-lfs | Out-Null
-		Write-Host "[" -NoNewline
-		Write-Host "✓" -NoNewline -ForegroundColor Green
-		Write-Host "]" -NoNewline
-		
-		Write-Host " Git-LFS is installed."
+		success "Git-LFS is installed."
 		$global:check += 1
 	}
 	Catch [System.Management.Automation.CommandNotFoundException]
 	{
-		Write-Host "[" -NoNewline
-		Write-Host "X" -NoNewline -ForegroundColor Red
-		Write-Host "]" -NoNewline
-		
-		Write-Host " Git-LFS is not installed."
+		error "Git-LFS is not installed."
 	}
 }
-function check_software($app)
+function check_software ($app)
 {
 	$installed32 = (Get-ItemProperty HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\* | Where { $_.DisplayName -eq $app }) -ne $null
 	$installed64 = (Get-ItemProperty HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Where { $_.DisplayName -eq $app }) -ne $null
 	
 	If ($installed32 -or $installed64)
 	{
-		Write-Host "[" -NoNewline
-		Write-Host "✓" -NoNewline -ForegroundColor Green
-		Write-Host "]" -NoNewline
-
-		Write-Host " $app is installed."
+		success "$app is installed."
 		$global:check += 1
 	}
 	Else
 	{
-		Write-Host "[" -NoNewline
-		Write-Host "X" -NoNewline -ForegroundColor Red
-		Write-Host "]" -NoNewline
-		
-		Write-Host " $app is not intsalled."
+		error "$app is not intsalled."
 	}
 }
 function check_ram ($in)
@@ -65,20 +63,12 @@ function check_ram ($in)
 
 	If ($total -gt $in)
 	{
-		Write-Host "[" -NoNewline
-		Write-Host "✓" -NoNewline -ForegroundColor Green
-		Write-Host "]" -NoNewline
-		
-		Write-Host " $total GB RAM detected."
+		success "$total GB RAM detected."
 		$global:check += 1
 	}
 	Else
 	{
-		Write-Host "[" -NoNewline
-		Write-Host "X" -NoNewline -ForegroundColor Red
-		Write-Host "]" -NoNewline
-		
-		Write-Host " $in GB RAM detected. You need at least 3 GB."
+		error "$in GB RAM detected. You need at least 3 GB."
 	}
 }
 function check_arch
@@ -87,20 +77,12 @@ function check_arch
 	
 	If ($arch -eq "64-bit")
 	{
-		Write-Host "[" -NoNewline
-		Write-Host "✓" -NoNewline -ForegroundColor Green
-		Write-Host "]" -NoNewline
-		
-		Write-Host " $arch OS detected."
+		success "$arch OS detected."
 		$global:check += 1
 	}
 	Else
 	{
-		Write-Host "[" -NoNewline
-		Write-Host "X" -NoNewline -ForegroundColor Red
-		Write-Host "]" -NoNewline
-		
-		Write-Host " $arch OS detected. You need a 64-bit system to install Longvinter Server."
+		error "$arch OS detected. You need a 64-bit system to install Longvinter Server."
 	}
 }
 function getkey
@@ -113,11 +95,7 @@ function getkey
 	}
 	Else
 	{
-		Write-Host "[" -NoNewline
-		Write-Host "X" -NoNewline -ForegroundColor Red
-		Write-Host "]" -NoNewline -ForegroundColor Gray
-		
-		Write-Host " Longvinter.log not found. Please run the server first."
+		error "Longvinter.log not found. Please run the server first."
 	}
 	
 	Exit
@@ -126,7 +104,36 @@ function update
 {
 	# TODO: Implement git updating
 }
+function backup
+{
+	$ctime = Get-Date -Format "yyyyMMdd-HHmm"
+	mkdir ".\longvinter-windows-server\Longvinter\Backup" -ErrorAction SilentlyContinue
+	tar --exclude="*Logs*" --exclude="*CrashReportClient*" -cvzf ".\longvinter-windows-server\Longvinter\Backup\$ctime.tar.gz" ".\longvinter-windows-server\Longvinter\Saved" 2> $null
+	success "Created backup in .\longvinter-windows-server\Longvinter\Backup\$ctime.tar.gz"
+}
+function uninstall
+{
+	Remove-Item ".\longvinter-windows-server" -Recurse -Force -ErrorAction SilentlyContinue
+	success "Removed longvinter-windows-server."
+	
+	$udp = Get-NetFirewallRule -DisplayName "LongvinterServer UDP" 2> $null
+	$tcp = Get-NetFirewallRule -DisplayName "LongvinterServer TCP" 2> $null
+	If ($udp -or $tcp)
+	{
+		Remove-NetFirewallRule -DisplayName "LongvinterServer UDP"
+		Remove-NetFirewallRule -DisplayName "LongvinterServer TCP"
+		success "Removed Firewall rules."
+	}
+	Else
+	{
+		success "No firewall rules exist."
+	}
+	
+	Remove-Item ".\Longvinter.lnk" -ErrorAction SilentlyContinue
+	success "Removed Longvinter shortcut."
+}
 
+# Handle commandline arguments
 If ($args.Count -eq 1)
 {
 	If ($args[0].ToString().ToLower() -eq "getkey")
@@ -139,18 +146,17 @@ If ($args.Count -eq 1)
 	}
 	Elseif ($args[0].ToString().ToLower() -eq "backup")
 	{
-		$ctime = Get-Date -Format "yyyyMMdd-HHmm"
-		mkdir ".\longvinter-windows-server\Longvinter\Backup" -ErrorAction SilentlyContinue
-		tar --exclude="*Logs*" --exclude="*CrashReportClient*" -cvzf ".\longvinter-windows-server\Longvinter\Backup\$ctime.tar.gz" ".\longvinter-windows-server\Longvinter\Saved"
+		backup
 	}
 	Elseif ($args[0].ToString().ToLower() -eq "uninstall")
 	{
-		Remove-Item ".\longvinter-windows-server" -Recurse
-		Write-Host "Removed longvinter-windows-server."
+		Write-Host "Uninstalling the server will delete everything in this folder, including backups."
+		$answer = Read-Host "> Are you sure you want to uninstall the server? (y/n)"
 		
-		Remove-NetFirewallRule -DisplayName "LongvinterServer UDP"
-		Remove-NetFirewallRule -DisplayName "LongvinterServer TCP"
-		Write-Host "Removed Firewall rules."
+		If ($answer.ToLower() -eq "yes" -or $answer.ToLower() -eq "y")
+		{
+			uninstall
+		}
 	}
 	
 	Exit
