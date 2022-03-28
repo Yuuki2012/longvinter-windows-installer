@@ -9,10 +9,12 @@ PowerShell installer script for Longvinter Windows Server
 5. Git + git-lfs
 
 ## Commands
-`.\Manager.ps1 getkey`
-`.\Manager.ps1 update`
-`.\Manager.ps1 backup`
-`.\Manager.ps1 uninstall`
+```
+.\Manager.ps1 getkey
+.\Manager.ps1 update
+.\Manager.ps1 backup
+.\Manager.ps1 uninstall
+```
 Running without arguments will install the server.
 
 #
