@@ -168,7 +168,27 @@ If ($check -eq 5)
 	Write-Host "Cloning Longvinter Windows Server repository..."
 	git clone -q https://github.com/Uuvana-Studios/longvinter-windows-server.git
 	
-	Move-Item ".\longvinter-windows-server\Longvinter\Saved\Config\WindowsServer\Game.ini.default" ".\longvinter-windows-server\Longvinter\Saved\Config\WindowsServer\Game.ini"
+	# Fail-safe for Game.ini.default
+	If (Test-Path ".\longvinter-windows-server\Longvinter\Saved\Config\WindowsServer\Game.ini.default" -PathType Leaf)
+	{
+		Copy-Item ".\longvinter-windows-server\Longvinter\Saved\Config\WindowsServer\Game.ini.default" ".\longvinter-windows-server\Longvinter\Saved\Config\WindowsServer\Game.ini"
+	}
+	Else
+	{
+		Set-Content -Path ".\longvinter-windows-server\Longvinter\Saved\Config\WindowsServer\Game.ini" -Value "[/game/blueprints/server/gi_advancedsessions.gi_advancedsessions_c]
+ServerName=Unnamed Island
+MaxPlayers=32
+ServerMOTD=Welcome to Longvinter Island!
+Password=
+CommunityWebsite=www.longvinter.com
+
+[/game/blueprints/server/gm_longvinter.gm_longvinter_c]
+AdminSteamID=97615967659669198
+PVP=true
+TentDecay=true
+MaxTents=2"
+	}
+	
 	Write-Host "> It is suggested to edit the Game.ini to your liking."
 	$edit = Read-Host "> Do you want to edit Game.ini? y/n"
 	If ($edit.ToLower() -eq "yes" -or $edit.ToLower() -eq "y")
