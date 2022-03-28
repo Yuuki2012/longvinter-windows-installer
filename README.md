@@ -8,12 +8,12 @@ PowerShell installer script for Longvinter Windows Server
 4. Steam
 5. Git + git-lfs
 
-## Installation
-```powershell
-.\Manager.ps1 getkey
-.\Manager.ps1 update
-.\Manager.ps1 backup
-.\Manager.ps1 uninstall```
+## Commands
+`.\Manager.ps1 getkey`
+`.\Manager.ps1 update`
+`.\Manager.ps1 backup`
+`.\Manager.ps1 uninstall`
+Running without arguments will install the server.
 
 #
 
