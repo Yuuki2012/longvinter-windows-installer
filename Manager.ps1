@@ -102,7 +102,19 @@ function getkey
 }
 function update
 {
-	# TODO: Implement git updating
+	If (Test-Path ".\longvinter-windows-server\" -PathType Any)
+	{
+		Set-Location ".\longvinter-windows-server\"
+		git fetch
+		git restore .
+		git pull
+		Set-Location "..\"
+		success "Successfully updated server."
+	}
+	Else
+	{
+		error "Longvinter Windows Server is not installed."
+	}
 }
 function backup
 {
@@ -151,7 +163,7 @@ If ($args.Count -eq 1)
 	Elseif ($args[0].ToString().ToLower() -eq "uninstall")
 	{
 		Write-Host "Uninstalling the server will delete everything in this folder, including backups."
-		$answer = Read-Host "> Are you sure you want to uninstall the server? (y/n)"
+		$answer = Read-Host "> Are you sure you want to uninstall the server? y/n"
 		
 		If ($answer.ToLower() -eq "yes" -or $answer.ToLower() -eq "y")
 		{
