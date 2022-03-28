@@ -24,7 +24,7 @@ function check_git-lfs
 		Write-Host "✓" -NoNewline -ForegroundColor Green
 		Write-Host "]" -NoNewline
 		
-		Write-Host " Git-LFS is installed"
+		Write-Host " Git-LFS is installed."
 		$global:check += 1
 	}
 	Catch [System.Management.Automation.CommandNotFoundException]
@@ -39,7 +39,7 @@ function check_git-lfs
 function check_software($app)
 {
 	$installed32 = (Get-ItemProperty HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\* | Where { $_.DisplayName -eq $app }) -ne $null
-	$installed64 = (Get-ItemProperty HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | where { $_.DisplayName -eq $app }) -ne $null
+	$installed64 = (Get-ItemProperty HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Where { $_.DisplayName -eq $app }) -ne $null
 	
 	If ($installed32 -or $installed64)
 	{
