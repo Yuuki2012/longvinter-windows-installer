@@ -137,6 +137,22 @@ If ($args.Count -eq 1)
 	{
 		update
 	}
+	Elseif ($args[0].ToString().ToLower() -eq "backup")
+	{
+		$ctime = Get-Date -Format "yyyyMMdd-HHmm"
+		mkdir ".\longvinter-windows-server\Longvinter\Backup" -ErrorAction SilentlyContinue
+		tar --exclude="*Logs*" --exclude="*CrashReportClient*" -cvzf ".\longvinter-windows-server\Longvinter\Backup\$ctime.tar.gz" ".\longvinter-windows-server\Longvinter\Saved"
+	}
+	Elseif ($args[0].ToString().ToLower() -eq "uninstall")
+	{
+		Remove-Item ".\longvinter-windows-server" -Recurse
+		Write-Host "Removed longvinter-windows-server."
+		
+		Remove-NetFirewallRule -DisplayName "LongvinterServer UDP"
+		Remove-NetFirewallRule -DisplayName "LongvinterServer TCP"
+		Write-Host "Removed Firewall rules."
+	}
+	
 	Exit
 }
 
