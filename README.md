@@ -1,5 +1,5 @@
-# longvinter-windows-installer
-PowerShell installer script for Longvinter Windows Server
+# longvinter-windows-manager
+PowerShell manager for Longvinter Windows Server
 
 ### Requirements
 1. Administrator privileges
