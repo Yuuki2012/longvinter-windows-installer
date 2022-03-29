@@ -30,3 +30,5 @@ PowerShell manager for Longvinter Windows Server
 #
 
 *Script made by Yuuki / 第一#0001 @ Discord*
+
+*Original repository on [GitHub](https://github.com/Yuuki2012/longvinter-windows-manager)*.
