@@ -47,12 +47,12 @@ function check_software ($app)
 	$installed32 = (Get-ItemProperty HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\* | Where { $_.DisplayName -eq $app }) -ne $null
 	$installed64 = (Get-ItemProperty HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Where { $_.DisplayName -eq $app }) -ne $null
 	
-	If ($installed32 -or $installed64)
+	if ($installed32 -or $installed64)
 	{
 		success "$app is installed."
 		$global:check += 1
 	}
-	Else
+	else
 	{
 		error "$app is not intsalled."
 	}
@@ -61,28 +61,49 @@ function check_ram ($in)
 {
 	$total = (Get-CimInstance Win32_PhysicalMemory | Measure-Object -Property capacity -Sum).sum /1gb
 
-	If ($total -gt $in)
+	if ($total -gt $in)
 	{
 		success "$total GB RAM detected."
 		$global:check += 1
 	}
-	Else
+	else
 	{
 		error "$in GB RAM detected. You need at least 3 GB."
 	}
 }
 function check_arch
 {
-	$arch = (Get-CIMInstance CIM_OperatingSystem).OSArchitecture
+	$arch = (Get-CimInstance CIM_OperatingSystem).OSArchitecture
 	
-	If ($arch -eq "64-bit")
+	if ($arch -eq "64-bit")
 	{
 		success "$arch OS detected."
 		$global:check += 1
 	}
-	Else
+	else
 	{
 		error "$arch OS detected. You need a 64-bit system to install Longvinter Server."
+	}
+}
+function check_os
+{
+	$win10 = "Microsoft Windows 10"
+	$win11 = "Microsoft Windows 11"
+	$os = [string](Get-CimInstance Win32_OperatingSystem).Name
+	
+	if ($os.Contains($win11))
+	{
+		success "$win11 detected."
+		$global:check += 1
+	}
+	elseif ($os.Contains($win10))
+	{
+		success "$win10 detected."
+		$global:check += 1
+	}
+	else
+	{
+		error "Operating System is not supported."
 	}
 }
 function getkey
@@ -93,7 +114,7 @@ function getkey
 	{
 		Write-Host ([uint64](Select-String -Pattern "0[xX][0-9a-fA-F]{15}" -Path ".\longvinter-windows-server\Longvinter\Saved\Logs\Longvinter.log").Matches.groups[0].value) -NoNewline -ForegroundColor Green
 	}
-	Else
+	else
 	{
 		error "Longvinter.log not found. Please run the server first."
 	}
@@ -102,7 +123,7 @@ function getkey
 }
 function update
 {
-	If (Test-Path ".\longvinter-windows-server\" -PathType Any)
+	if (Test-Path ".\longvinter-windows-server\" -PathType Any)
 	{
 		Set-Location ".\longvinter-windows-server\"
 		git fetch
@@ -111,7 +132,7 @@ function update
 		Set-Location "..\"
 		success "Successfully updated server."
 	}
-	Else
+	else
 	{
 		error "Longvinter Windows Server is not installed."
 	}
@@ -130,13 +151,13 @@ function uninstall
 	
 	$udp = Get-NetFirewallRule -DisplayName "LongvinterServer UDP" 2> $null
 	$tcp = Get-NetFirewallRule -DisplayName "LongvinterServer TCP" 2> $null
-	If ($udp -or $tcp)
+	if ($udp -or $tcp)
 	{
 		Remove-NetFirewallRule -DisplayName "LongvinterServer UDP"
 		Remove-NetFirewallRule -DisplayName "LongvinterServer TCP"
 		success "Removed Firewall rules."
 	}
-	Else
+	else
 	{
 		success "No firewall rules exist."
 	}
@@ -146,26 +167,26 @@ function uninstall
 }
 
 # Handle commandline arguments
-If ($args.Count -eq 1)
+if ($args.Count -eq 1)
 {
-	If ($args[0].ToString().ToLower() -eq "getkey")
+	if ($args[0].ToString().ToLower() -eq "getkey")
 	{
 		getkey
 	}
-	Elseif ($args[0].ToString().ToLower() -eq "update")
+	elseif ($args[0].ToString().ToLower() -eq "update")
 	{
 		update
 	}
-	Elseif ($args[0].ToString().ToLower() -eq "backup")
+	elseif ($args[0].ToString().ToLower() -eq "backup")
 	{
 		backup
 	}
-	Elseif ($args[0].ToString().ToLower() -eq "uninstall")
+	elseif ($args[0].ToString().ToLower() -eq "uninstall")
 	{
 		Write-Host "Uninstalling the server will delete everything in this folder, including backups."
 		$answer = Read-Host "> Are you sure you want to uninstall the server? y/n"
 		
-		If ($answer.ToLower() -eq "yes" -or $answer.ToLower() -eq "y")
+		if ($answer.ToLower() -eq "yes" -or $answer.ToLower() -eq "y")
 		{
 			uninstall
 		}
@@ -180,18 +201,19 @@ check_software("Git")
 check_git-lfs
 check_ram(3)  # argument is amount of (required) RAM in GB.
 check_arch
+check_os
 
-If ($check -eq 5)
+if ($check -eq 6)
 {
 	Write-Host "Cloning Longvinter Windows Server repository..."
 	git clone -q https://github.com/Uuvana-Studios/longvinter-windows-server.git
 	
 	# Fail-safe for Game.ini.default
-	If (Test-Path ".\longvinter-windows-server\Longvinter\Saved\Config\WindowsServer\Game.ini.default" -PathType Leaf)
+	if (Test-Path ".\longvinter-windows-server\Longvinter\Saved\Config\WindowsServer\Game.ini.default" -PathType Leaf)
 	{
 		Copy-Item ".\longvinter-windows-server\Longvinter\Saved\Config\WindowsServer\Game.ini.default" ".\longvinter-windows-server\Longvinter\Saved\Config\WindowsServer\Game.ini"
 	}
-	Else
+	else
 	{
 		Set-Content -Path ".\longvinter-windows-server\Longvinter\Saved\Config\WindowsServer\Game.ini" -Value "[/game/blueprints/server/gi_advancedsessions.gi_advancedsessions_c]
 ServerName=Unnamed Island
@@ -209,7 +231,7 @@ MaxTents=2"
 	
 	Write-Host "> It is suggested to edit the Game.ini to your liking."
 	$edit = Read-Host "> Do you want to edit Game.ini? y/n"
-	If ($edit.ToLower() -eq "yes" -or $edit.ToLower() -eq "y")
+	if ($edit.ToLower() -eq "yes" -or $edit.ToLower() -eq "y")
 	{
 		notepad ".\longvinter-windows-server\Longvinter\Saved\Config\WindowsServer\Game.ini"
 	}
@@ -234,7 +256,7 @@ MaxTents=2"
 	Write-Host ""
 	Write-Host "You can now run the shortcut in the current directory."
 }
-Else
+else
 {
 	Write-Host "One or more checks failed. Cannot install Longvinter Server."
 	Exit
