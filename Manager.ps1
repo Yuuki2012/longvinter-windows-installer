@@ -112,7 +112,7 @@ function getkey
 	
 	IF ($exists)
 	{
-		Write-Host ([uint64](Select-String -Pattern "0[xX][0-9a-fA-F]{15}" -Path ".\longvinter-windows-server\Longvinter\Saved\Logs\Longvinter.log").Matches.groups[0].value) -NoNewline -ForegroundColor Green
+		Write-Host (Select-String -Pattern "'[0-9a-f]{32}" -Path ".\longvinter-windows-server\Longvinter\Saved\Logs\Longvinter.log").Matches.groups[0].value.ToString().Replace("'", "") -NoNewline -ForegroundColor Green
 	}
 	else
 	{
